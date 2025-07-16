@@ -2,9 +2,52 @@ import os
 import sys
 from PIL import Image
 import numpy as np
-from sklearn.cluster import KMeans
-import winreg
 import json
+
+pixel_color_map = {
+    "cd5455": "0.9460317:0.08793658",
+    "caa215": "0.787302:0.05619055",
+    "bbad07": "0.6603174:0.06571439",
+    "7bc254": "0.4825399:0.07523811",
+    "0ebebc": "0.3333334:0.08793658",
+    "7aabcd": "0.209524:0.07206351",
+    "c12fd4": "0.06031764:0.05619055",
+    "c50000": "0.9396828:0.2784127",
+    "cc8d00": "0.809524:0.2561905",
+    "beb200": "0.6857144:0.2784127",
+    "00c800": "0.5619048:0.2879366",
+    "00c8c1": "0.3650795:0.2593651",
+    "008ade": "0.257143:0.2911112",
+    "b600dc": "0.03174627:0.2530159",
+    "c70000": "0.9555559:0.3863491",
+    "cf6d00": "0.8000001:0.427619",
+    "c0af00": "0.6476193:0.4180952",
+    "00c200": "0.5238097:0.4212698",
+    "00cdc8": "0.3587303:0.4307936",
+    "0000e5": "0.2285715:0.4244444",
+    "9100de": "0.06031764:0.4339682",
+    "610000": "0.9174606:0.5704762",
+    "6c2e00": "0.8285716:0.5831746",
+    "6b5f00": "0.6539685:0.5546032",
+    "009700": "0.5142859:0.5831746",
+    "00787c": "0.3777779:0.564127",
+    "0007b9": "0.2285715:0.6022222",
+    "4700a4": "0.08571446:0.58",
+    "230000": "0.9777781:0.7450794",
+    "341500": "0.7555556:0.7355555",
+    "241f00": "0.6349207:0.7736508",
+    "003200": "0.5269845:0.7609525",
+    "00262b": "0.3841273:0.7609525",
+    "000b50": "0.2507938:0.78",
+    "240050": "0.03174627:0.7546031",
+    "e2dfe0": "0.9746034:0.9419048",
+    "d5d3d4": "0.8000001:0.9196825",
+    "bdbdbc": "0.6317463:0.9196825",
+    "a4a49f": "0.5238097:0.9038095",
+    "696e77": "0.3587303:0.9133333",
+    "293034": "0.2063494:0.9038095",
+    "020202": "0.0476191:0.9196825",
+}
 
 class PixelGridConverter:
     def __init__(self, grid_width=100, grid_height=66, company_name="DefaultCompany", product_name="DrawPixels"):
@@ -28,60 +71,30 @@ class PixelGridConverter:
     
     def resize_image_to_grid(self, image):
         return image.resize((self.grid_width, self.grid_height), Image.NEAREST)
-    
-    def extract_unique_colors(self, image):
-        img_array = np.array(image)
         
-        pixels = img_array.reshape(-1, 4)
-        
-        unique_pixels = np.unique(pixels, axis=0)
-        
-        palette = [tuple(color) for color in unique_pixels]
-        
-        return palette
-    
-    def create_color_texture(self, palette, texture_width=16):
-        colors_per_row = texture_width
-        texture_height = (len(palette) + colors_per_row - 1) // colors_per_row
-        
-        texture = Image.new('RGBA', (texture_width, texture_height), (0, 0, 0, 0))
-        
-        for i, color in enumerate(palette):
-            x = i % colors_per_row
-            y = i // colors_per_row
-            texture.putpixel((x, y), color)
-        
-        return texture, texture_width, texture_height
-    
-    def find_exact_color_match(self, target_color, palette):
-        try:
-            return palette.index(target_color)
-        except ValueError:
-            return self.find_closest_color(target_color, palette)
-        target = np.array(target_color)
+    def find_closest_color(self, target_color):
+        r, g, b, a = target_color  # RGBA
+
         min_distance = float('inf')
-        closest_index = 0
-        
-        for i, palette_color in enumerate(palette):
-            distance = np.sqrt(np.sum((target - np.array(palette_color)) ** 2))
-            if distance < min_distance:
-                min_distance = distance
-                closest_index = i
-        
-    def find_closest_color(self, target_color, palette):
-        target = np.array(target_color)
-        min_distance = float('inf')
-        closest_index = 0
-        
-        for i, palette_color in enumerate(palette):
-            distance = np.sqrt(np.sum((target - np.array(palette_color)) ** 2))
-            if distance < min_distance:
-                min_distance = distance
-                closest_index = i
-        
-        return closest_index
+        closest_key = None
+
+        for hex_key in pixel_color_map.keys():
+            hex_r = int(hex_key[0:2], 16)
+            hex_g = int(hex_key[2:4], 16)
+            hex_b = int(hex_key[4:6], 16)
+
+            dist = ((r - hex_r) ** 2 + (g - hex_g) ** 2 + (b - hex_b) ** 2) ** 0.5
+
+            if dist < min_distance:
+                min_distance = dist
+                closest_key = hex_key
+
+        if closest_key is None:
+            raise ValueError(f"No closest color found for {target_color}")
+
+        return pixel_color_map[closest_key]
     
-    def convert_to_uv_coordinates(self, image, palette, texture_width, texture_height):
+    def convert_to_uv_coordinates(self, image):
         img_array = np.array(image)
         uv_grid = []
         
@@ -89,16 +102,9 @@ class PixelGridConverter:
             for x in range(self.grid_width):
                 pixel_color = tuple(img_array[y, x])
                 
-                color_index = self.find_exact_color_match(pixel_color, palette)
-                
-                tex_x = color_index % texture_width
-                tex_y = color_index // texture_width
-                
-                uv_x = tex_x / texture_width
-                uv_y = tex_y / texture_height
-                
-                uv_grid.append(f"{uv_x}:{uv_y}")
-        
+                color_index = self.find_closest_color(pixel_color,)
+                uv_grid.append(f"{color_index}")
+
         return uv_grid
     
     def serialize_grid_data(self, uv_grid):
@@ -115,6 +121,8 @@ class PixelGridConverter:
         return bytes(binary_data)
     
     def find_unity_registry_keys(self):
+        import winreg
+
         try:
             base_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"SOFTWARE\Unity\UnityEditor")
             companies = []
@@ -164,6 +172,7 @@ class PixelGridConverter:
         except WindowsError as e:
             print(f"Failed to save to Unity registry: {e}")
     def save_to_unity_registry(self, grid_data):
+        import winreg
         try:
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.unity_registry_path, 0, winreg.KEY_WRITE)
             
@@ -197,27 +206,12 @@ class PixelGridConverter:
             
             print(f"Resizing image to {self.grid_width}x{self.grid_height}")
             resized_image = self.resize_image_to_grid(image)
-            
-            if preserve_colors:
-                print("Extracting unique colors (preserving original image)")
-                palette = self.extract_unique_colors(resized_image)
-                print(f"Found {len(palette)} unique colors")
-            else:
-                print(f"Extracting color palette with clustering")
-                palette = self.extract_color_palette(resized_image, max_colors)
-                print(f"Reduced to {len(palette)} colors")
-            
-            print("Creating color texture")
-            color_texture, tex_width, tex_height = self.create_color_texture(palette)
-            
+                                    
             print("Converting to UV coordinates")
-            uv_grid = self.convert_to_uv_coordinates(resized_image, palette, tex_width, tex_height)
+            uv_grid = self.convert_to_uv_coordinates(resized_image)
             
             print("Serializing grid data")
             grid_data = self.serialize_grid_data(uv_grid)
-            
-            color_texture.save("color_palette.png")
-            print("Color palette saved as 'color_palette.png'")
             
             resized_image.save("resized_image.png")
             print("Resized image saved as 'resized_image.png'")

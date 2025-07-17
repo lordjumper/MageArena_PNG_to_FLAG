@@ -62,6 +62,9 @@ pixel_color_map = {
     "000000": "1.0:0.0",    # Black (darkest)
 }
 
+def get_rgb(hex_str):
+    return (int(hex_str[0:2], 16), int(hex_str[2:4], 16), int(hex_str[4:6], 16))
+
 class PixelGridConverter:
     def __init__(self, grid_width=100, grid_height=66, company_name="jrsjams", product_name="MageArena"):
         self.grid_width = grid_width
@@ -70,15 +73,13 @@ class PixelGridConverter:
         self.product_name = product_name
         self.unity_registry_path = rf"SOFTWARE\Unity\UnityEditor\{company_name}\{product_name}"
 
-        self.palette_lab = {}
-        for hex_key in pixel_color_map.keys():
-            r = int(hex_key[0:2], 16) / 255.0
-            g = int(hex_key[2:4], 16) / 255.0
-            b = int(hex_key[4:6], 16) / 255.0
-            rgb = np.array([[[r, g, b]]])  # shape (1,1,3)
-            lab = color.rgb2lab(rgb)[0][0] # shape (3,)
-            self.palette_lab[hex_key] = lab
-        
+        self.pil_palette = []
+        for color in pixel_color_map:
+            rgb = get_rgb(color)
+            self.pil_palette.append(rgb[0])
+            self.pil_palette.append(rgb[1])
+            self.pil_palette.append(rgb[2])
+
     def load_png_image(self, png_path):
         if not os.path.exists(png_path):
             raise FileNotFoundError(f"PNG file not found: {png_path}")
@@ -93,44 +94,25 @@ class PixelGridConverter:
     
     def resize_image_to_grid(self, image):
         return image.resize((self.grid_width, self.grid_height), Image.NEAREST)
-        
-    def find_closest_color(self, target_color):
-        r, g, b, a = target_color
-        if a < 255: return ("e2dfe0", pixel_color_map.get("e2dfe0", "0.9746034:0.9419048"))
-        
-        rgb = np.array([[[r/255.0, g/255.0, b/255.0]]])
-        target_lab = color.rgb2lab(rgb)[0][0]
 
-        min_distance = float('inf')
-        closest_key = None
-
-        for hex_key, lab in self.palette_lab.items():
-            dist = np.linalg.norm(target_lab - lab)
-            if dist < min_distance:
-                min_distance = dist
-                closest_key = hex_key
-
-        if closest_key is None:
-            raise ValueError(f"No closest color found for {target_color}")
-
-        return (closest_key, pixel_color_map[closest_key])
-
-    
     def convert_to_uv_coordinates(self, image, preserve_colors):
         img_array = np.array(image)
         uv_grid = []
         
-        for x in range(self.grid_width):
-            for y in range(self.grid_height - 1, -1, -1):
-                pixel_color = tuple(img_array[y, x])
+        palettized = Image.new('P', (16, 16))
+        palettized.putpalette(self.pil_palette)
+        image = image.convert("RGB").quantize(palette=palettized, dither=0) 
+        px = image.convert("RGB").load()
+        
+        for x in range(0, image.width):
+            for y in range(image.height -1, -1, -1):
+                r, g, b = px[x, y]
+                hex_code = f'{r:02x}{g:02x}{b:02x}'.upper()
+                uv = pixel_color_map.get(hex_code)
+                if uv == None:
+                    raise ValueError(f"Faield to find UV for '{hex_code}'")
                 
-                closest, color_index = self.find_closest_color(pixel_color)
-                uv_grid.append(f"{color_index}")
-                if not preserve_colors:
-                    hex_r = int(closest[0:2], 16)
-                    hex_g = int(closest[2:4], 16)
-                    hex_b = int(closest[4:6], 16)
-                    image.putpixel([x, y], (hex_r, hex_g, hex_b))
+                uv_grid.append(uv)
 
         return uv_grid
     

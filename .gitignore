@@ -1,2 +1,6 @@
 *.png
 *.txt
+dist
+build
+__pycache__
+*.spec

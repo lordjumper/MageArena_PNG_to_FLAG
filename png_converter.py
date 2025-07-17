@@ -51,7 +51,7 @@ pixel_color_map = {
 }
 
 class PixelGridConverter:
-    def __init__(self, grid_width=100, grid_height=66, company_name="DefaultCompany", product_name="DrawPixels"):
+    def __init__(self, grid_width=100, grid_height=66, company_name="jrsjams", product_name="MageArena"):
         self.grid_width = grid_width
         self.grid_height = grid_height
         self.company_name = company_name
@@ -174,18 +174,7 @@ class PixelGridConverter:
         except WindowsError:
             print("No Unity registry keys found")
             return []
-        try:
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.unity_registry_path, 0, winreg.KEY_WRITE)
-            
-            binary_data = self.encode_unity_string(grid_data)
-            
-            winreg.SetValueEx(key, "flagGrid_h2263043443", 0, winreg.REG_BINARY, binary_data)
-            
-            winreg.CloseKey(key)
-            print("Successfully saved to Unity registry!")
-            return True
-        except WindowsError as e:
-            print(f"Failed to save to Unity registry: {e}")
+    
     def save_to_unity_registry(self, grid_data):
         import winreg
         try:

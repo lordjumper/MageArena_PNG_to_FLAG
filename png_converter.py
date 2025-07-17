@@ -8,57 +8,57 @@ import json
 # Seperated them by color so we can read it better
 pixel_color_map = {
     # Row 1
-    "C17171": "0.0:0.31",    # Light red 
-    "C5A877": "0.2:0.32",    # Light orange/tan 
-    "B9B16E": "0.35:0.33",   # Light yellow/beige 
-    "97C38F": "0.5:0.34",    # Light green
-    "79BABA": "0.615:0.35",  # Light cyan 
-    "93ABCC": "0.65:0.36",   # Light blue 
-    "A96EBC": "0.8:0.37",    # Light purple 
+    "C17171": "0.0:0.9",    # Light red 
+    "C5A877": "0.2:0.9",    # Light orange/tan 
+    "B9B16E": "0.35:0.9",   # Light yellow/beige 
+    "97C38F": "0.5:0.9",    # Light green
+    "79BABA": "0.615:0.9",  # Light cyan 
+    "93ABCC": "0.79:0.9",   # Light blue 
+    "A96EBC": "1.0:0.9",    # Light purple 
     
     # Row 2 
-    "C43232": "0.0:0.51",    # Medium red 
-    "C7943C": "0.2:0.52",    # Medium orange 
-    "C3B435": "0.35:0.53",   # Medium yellow 
-    "60C34D": "0.5:0.54",    # Medium green 
-    "3AC1C0": "0.615:0.55",  # Medium cyan 
-    "5688CD": "0.65:0.56",   # Medium blue 
-    "9C34BD": "0.8:0.37",    # Medium purple 
+    "C43232": "0.0:0.75",    # Medium red 
+    "C7943C": "0.2:0.75",    # Medium orange 
+    "C3B435": "0.35:0.75",   # Medium yellow 
+    "60C34D": "0.5:0.75",    # Medium green 
+    "3AC1C0": "0.615:0.75",  # Medium cyan 
+    "5688CD": "0.79:0.75",   # Medium blue 
+    "9C34BD": "1.0:0.75",    # Medium purple 
     
     # Row 3
-    "C60000": "0.0:0.71",    # Dark red 
-    "C67E00": "0.2:0.72",    # Dark orange 
-    "C7B300": "0.35:0.73",   # Dark yellow 
-    "21C600": "0.5:0.74",    # Dark green 
-    "00C6C4": "0.615:0.75",  # Dark cyan 
-    "0054C6": "0.65:0.76",   # Dark blue 
-    "9200C1": "0.8:0.77",    # Dark purple 
+    "C60000": "0.0:0.58",    # Dark red 
+    "C67E00": "0.2:0.58",    # Dark orange 
+    "C7B300": "0.35:0.58",   # Dark yellow 
+    "21C600": "0.5:0.58",    # Dark green 
+    "00C6C4": "0.615:0.58",  # Dark cyan 
+    "0054C6": "0.79:0.58",   # Dark blue 
+    "9200C1": "1.0:0.58",    # Dark purple 
     
     # Row 4 
-    "6D0000": "0.0:0.81",    # Very dark red 
-    "764C00": "0.2:0.82",    # Very dark orange 
-    "7F7200": "0.35:0.83",   # Very dark yellow 
-    "1A9700": "0.5:0.84",    # Very dark green 
-    "007B79": "0.615:0.85",  # Very dark cyan
-    "003E93": "0.65:0.86",   # Very dark blue
-    "640084": "0.8:0.87",    # Very dark purple
+    "6D0000": "0.0:0.41",    # Very dark red 
+    "764C00": "0.2:0.41",    # Very dark orange 
+    "7F7200": "0.35:0.41",   # Very dark yellow 
+    "1A9700": "0.5:0.41",    # Very dark green 
+    "007B79": "0.615:0.41",  # Very dark cyan
+    "003E93": "0.79:0.41",   # Very dark blue
+    "640084": "1.0:0.41",    # Very dark purple
 
     # Row 5
-    "300000": "0.0:0.91",    # Darkest red 
-    "462D00": "0.2:0.92",    # Darkest orange 
-    "393300": "0.35:0.93",   # Darkest yellow
-    "0B4100": "0.5:0.94",    # Darkest green 
-    "003736": "0.615:0.95",  # Darkest cyan
-    "001F4A": "0.65:0.96",   # Darkest blue 
-    "38004A": "0.8:0.97",    # Darkest purple
+    "300000": "0.0:0.25",    # Darkest red 
+    "462D00": "0.2:0.25",    # Darkest orange 
+    "393300": "0.35:0.25",   # Darkest yellow
+    "0B4100": "0.5:0.25",    # Darkest green 
+    "003736": "0.615:0.25",  # Darkest cyan
+    "001F4A": "0.79:0.25",   # Darkest blue 
+    "38004A": "1.0:0.25",    # Darkest purple
 
     # Row 6
     "FFFFFF": "0.0:0.0",    # White (lightest)
     "DFDFDF": "0.2:0.0",    # Light gray
-    "BEBEBE": "0.4:0.0",    # Medium light gray
-    "A6A6A6": "0.6:0.0",    # Medium gray
-    "7D7D7D": "0.8:0.0",    # Medium dark gray
-    "464646": "0.9:0.0",    # Dark gray
+    "BEBEBE": "0.35:0.0",    # Medium light gray
+    "A6A6A6": "0.5:0.0",    # Medium gray
+    "7D7D7D": "0.62:0.0",    # Medium dark gray
+    "464646": "0.77:0.0",    # Dark gray
     "000000": "1.0:0.0",    # Black (darkest)
 }
 
@@ -110,7 +110,7 @@ class PixelGridConverter:
                 hex_code = f'{r:02x}{g:02x}{b:02x}'.upper()
                 uv = pixel_color_map.get(hex_code)
                 if uv == None:
-                    raise ValueError(f"Faield to find UV for '{hex_code}'")
+                    raise ValueError(f"Faield to find UV for '{hex_code}'") # should never happen as its been palettized
                 
                 uv_grid.append(uv)
 

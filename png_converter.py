@@ -14,7 +14,7 @@ pixel_color_map = {
     "97C38F": "0.5:0.9",    # Light green
     "79BABA": "0.615:0.9",  # Light cyan 
     "93ABCC": "0.79:0.9",   # Light blue 
-    "A96EBC": "1.0:0.9",    # Light purple 
+    "A96EBC": "0.98:0.9",    # Light purple 
     
     # Row 2 
     "C43232": "0.0:0.75",    # Medium red 
@@ -23,7 +23,7 @@ pixel_color_map = {
     "60C34D": "0.5:0.75",    # Medium green 
     "3AC1C0": "0.615:0.75",  # Medium cyan 
     "5688CD": "0.79:0.75",   # Medium blue 
-    "9C34BD": "1.0:0.75",    # Medium purple 
+    "9C34BD": "0.98:0.75",    # Medium purple 
     
     # Row 3
     "C60000": "0.0:0.58",    # Dark red 
@@ -32,7 +32,7 @@ pixel_color_map = {
     "21C600": "0.5:0.58",    # Dark green 
     "00C6C4": "0.615:0.58",  # Dark cyan 
     "0054C6": "0.79:0.58",   # Dark blue 
-    "9200C1": "1.0:0.58",    # Dark purple 
+    "9200C1": "0.98:0.58",    # Dark purple 
     
     # Row 4 
     "6D0000": "0.0:0.41",    # Very dark red 
@@ -41,7 +41,7 @@ pixel_color_map = {
     "1A9700": "0.5:0.41",    # Very dark green 
     "007B79": "0.615:0.41",  # Very dark cyan
     "003E93": "0.79:0.41",   # Very dark blue
-    "640084": "1.0:0.41",    # Very dark purple
+    "640084": "0.98:0.41",    # Very dark purple
 
     # Row 5
     "300000": "0.0:0.25",    # Darkest red 
@@ -50,16 +50,16 @@ pixel_color_map = {
     "0B4100": "0.5:0.25",    # Darkest green 
     "003736": "0.615:0.25",  # Darkest cyan
     "001F4A": "0.79:0.25",   # Darkest blue 
-    "38004A": "1.0:0.25",    # Darkest purple
+    "38004A": "0.98:0.25",    # Darkest purple
 
     # Row 6
-    "FFFFFF": "0.0:0.0",    # White (lightest)
-    "DFDFDF": "0.2:0.0",    # Light gray
-    "BEBEBE": "0.35:0.0",    # Medium light gray
-    "A6A6A6": "0.5:0.0",    # Medium gray
-    "7D7D7D": "0.62:0.0",    # Medium dark gray
-    "464646": "0.77:0.0",    # Dark gray
-    "000000": "1.0:0.0",    # Black (darkest)
+    "FFFFFF": "0.0:0.05",    # White (lightest)
+    "DFDFDF": "0.2:0.05",    # Light gray
+    "BEBEBE": "0.35:0.05",    # Medium light gray
+    "A6A6A6": "0.5:0.05",    # Medium gray
+    "7D7D7D": "0.62:0.05",    # Medium dark gray
+    "464646": "0.77:0.05",    # Dark gray
+    "000000": "0.96:0.05",    # Black (darkest)
 }
 
 def get_rgb(hex_str):

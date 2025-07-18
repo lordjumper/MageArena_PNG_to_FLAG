@@ -1,6 +1,8 @@
+### Just download the exe from releases then proceed to the **Registry** section after using the gui and getting your image data
+-------------------------------------------------------------------------------------------------
 # Dependencies
 
-## Installation
+## Manual Installation
 
 Must have python installed to use pip package manager.
 

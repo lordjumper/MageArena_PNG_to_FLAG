@@ -71,7 +71,8 @@ class PixelGridConverter:
         self.grid_height = grid_height
         self.company_name = company_name
         self.product_name = product_name
-        self.unity_registry_path = rf"SOFTWARE\Unity\UnityEditor\{company_name}\{product_name}"
+        self.unity_registry_path = rf"SOFTWARE\{company_name}\{product_name}"
+        self.registry_key_name = ""
 
         self.pil_palette = []
         for color in pixel_color_map:
@@ -119,16 +120,6 @@ class PixelGridConverter:
     def serialize_grid_data(self, uv_grid):
         return ",".join(uv_grid)
     
-    def encode_unity_string(self, data):
-        utf8_bytes = data.encode('utf-8')
-        length = len(utf8_bytes)
-        
-        binary_data = bytearray()
-        binary_data.extend(length.to_bytes(4, byteorder='little'))
-        binary_data.extend(utf8_bytes)
-        
-        return bytes(binary_data)
-    
     def find_unity_registry_keys(self):
         import winreg
 
@@ -172,18 +163,26 @@ class PixelGridConverter:
     def save_to_unity_registry(self, grid_data):
         import winreg
         try:
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.unity_registry_path, 0, winreg.KEY_WRITE)
+            # Try to create or open the registry key
+            try:
+                key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, self.unity_registry_path, 0, winreg.KEY_WRITE)
+            except WindowsError as e:
+                print(f"Failed to create/open registry key: {e}")
+                return False
             
-            binary_data = self.encode_unity_string(grid_data)
-            
-            winreg.SetValueEx(key, "flagGrid_h2263043443", 0, winreg.REG_BINARY, binary_data)
-            
-            winreg.CloseKey(key)
-            print("Successfully saved to Unity registry!")
-            return True
-        except WindowsError as e:
-            print(f"Failed to save to Unity registry: {e}")
-            print("Try running with --find-registry to locate the correct path")
+            try:
+                # Save as string value instead of binary
+                winreg.SetValueEx(key, self.registry_key_name, 0, winreg.REG_SZ, grid_data)
+                winreg.CloseKey(key)
+                print("Successfully saved to Unity registry!")
+                return True
+            except WindowsError as e:
+                print(f"Failed to set registry value: {e}")
+                winreg.CloseKey(key)
+                return False
+                
+        except Exception as e:
+            print(f"Unexpected error saving to Unity registry: {e}")
             return False
     
     def save_to_file(self, grid_data, output_path="pixel_grid_data.txt"):
@@ -226,8 +225,6 @@ class PixelGridConverter:
             if success:
                 print("Conversion completed successfully!")
                 print(f"Image will appear as a {self.grid_width}x{self.grid_height} pixel version of your original")
-            else:
-                print("Conversion completed but failed to save data!")
                 
             return grid_data
             
